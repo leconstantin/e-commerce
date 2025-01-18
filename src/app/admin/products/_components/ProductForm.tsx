@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addSchema, TaddSchema } from "@/lib/types";
 import { addProduct } from "../../_actions/products";
+import { toast } from "sonner";
 
 export default function ProductForm() {
   const {
@@ -33,7 +34,9 @@ export default function ProductForm() {
 
   const onSubmit = async (data: TaddSchema) => {
     // console.log(data);
+    // await new Promise((resolve) => setTimeout(resolve, 2000));
     addProduct(data);
+    toast("Product has been created.");
     reset();
   };
 
@@ -55,7 +58,6 @@ export default function ProductForm() {
           type="text"
           id="name"
           aria-invalid={!!errors.name}
-          required
         />
         {errors.name && <p className="text-red-500">{errors.name.message}</p>}
       </div>
@@ -106,8 +108,16 @@ export default function ProductForm() {
         {errors.image && <p className="text-red-500">{errors.image.message}</p>}
       </div>
       <Button type="submit" disabled={isSubmitting}>
-        Save
+        {isSubmitting ? "Saving ..." : "Save"}
       </Button>
     </form>
   );
 }
+
+// function SubmitButton(){
+//   return(
+//     <Button type="submit" disabled={isSubmitting}>
+//         Save
+//       </Button>
+//   )
+// }

@@ -27,6 +27,7 @@ export async function addProduct(formData: TaddSchema) {
       name: data.name,
       description: data.description,
       priceInCents: data.priceInCents,
+      isAvailableForPurchase: false,
       filePath,
       imagePath,
     },
