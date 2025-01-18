@@ -4,12 +4,10 @@ const fileSchema = z
   .instanceof(File, { message: "Required" })
   .refine((file) => file.size > 0, "File is empty");
 
-const imageSchema = fileSchema
-  .optional()
-  .refine(
-    (file) => !file || file.type.startsWith("image/"),
-    "Invalid image file type"
-  );
+const imageSchema = fileSchema.refine(
+  (file) => !file || file.type.startsWith("image/"),
+  "Invalid image file type"
+);
 
 export const addSchema = z.object({
   name: z.string().min(1, "Name is required"),

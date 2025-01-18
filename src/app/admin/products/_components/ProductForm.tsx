@@ -39,9 +39,11 @@ export default function ProductForm() {
 
   const handleFileChange =
     (fieldName: "file" | "image") =>
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0];
-      setValue(fieldName, file); // Manually set the file value in react-hook-form
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        setValue(fieldName, file); // Manually set the file value in react-hook-form
+      }
     };
 
   return (
