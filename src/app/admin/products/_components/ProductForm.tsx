@@ -5,29 +5,45 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { formatCurrency } from "@/lib/formatters";
-import { useState } from "react";
-import { addProduct, addSchema, TaddSchema } from "../../_actions/products";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { addSchema, TaddSchema } from "@/lib/types";
+import { addProduct } from "../../_actions/products";
 
 export default function ProductForm() {
-  //   const [priceInCents, setPriceInCents] = useState<number>();
-  //   const [name, setName] = useState<string>("");
-  //   const [description, setDescription] = useState<string>("");
-  //   const [file, setFile] = useState<File | undefined>();
-  //   const [image, setImage] = useState();
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
+    watch,
+    setValue,
   } = useForm<TaddSchema>({
     resolver: zodResolver(addSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      priceInCents: 0,
+      file: undefined,
+      image: undefined,
+    },
   });
+
+  const watchPriceInCents = watch("priceInCents", 0);
+
   const onSubmit = async (data: TaddSchema) => {
-    console.log(data);
+    // console.log(data);
+    addProduct(data);
     reset();
   };
+
+  const handleFileChange =
+    (fieldName: "file" | "image") =>
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      setValue(fieldName, file); // Manually set the file value in react-hook-form
+    };
+
   return (
     <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
       <div className="space-y-2">
@@ -36,7 +52,7 @@ export default function ProductForm() {
           {...register("name")}
           type="text"
           id="name"
-          name="name"
+          aria-invalid={!!errors.name}
           required
         />
         {errors.name && <p className="text-red-500">{errors.name.message}</p>}
@@ -44,28 +60,24 @@ export default function ProductForm() {
       <div className="space-y-2">
         <Label htmlFor="priceInCents">Price In Cents</Label>
         <Input
-          {...register("priceInCents")}
+          {...register("priceInCents", { valueAsNumber: true })}
           type="number"
           id="priceInCents"
-          name="priceInCents"
-          required
-          //   value={priceInCents}
-          //   onChange={(e) => setPriceInCents(Number(e.target.value) || undefined)}
+          aria-invalid={!!errors.priceInCents}
         />
         {errors.priceInCents && (
           <p className="text-red-500">{errors.priceInCents.message}</p>
         )}
-        {/* <div className="text-muted-foreground">
-          {formatCurrency((priceInCents || 0) / 100)}
-        </div> */}
+        <div className="text-muted-foreground">
+          {formatCurrency(watchPriceInCents / 100)}
+        </div>
       </div>
       <div className="space-y-2">
         <Label htmlFor="description">Description</Label>
-        <textarea
+        <Textarea
           {...register("description")}
           id="description"
-          name="description"
-          required
+          aria-invalid={!!errors.description}
         />
         {errors.description && (
           <p className="text-red-500">{errors.description.message}</p>
@@ -74,22 +86,20 @@ export default function ProductForm() {
       <div className="space-y-2">
         <Label htmlFor="file">File</Label>
         <Input
-          {...register("file")}
           type="file"
           id="file"
-          name="file"
-          required
+          aria-invalid={!!errors.file}
+          onChange={handleFileChange("file")} // Handle file input manually
         />
         {errors.file && <p className="text-red-500">{errors.file.message}</p>}
       </div>
       <div className="space-y-2">
         <Label htmlFor="image">Image</Label>
         <Input
-          {...register("image")}
           type="file"
           id="image"
-          name="image"
-          required
+          aria-invalid={!!errors.image}
+          onChange={handleFileChange("image")} // Handle image input manually
         />
         {errors.image && <p className="text-red-500">{errors.image.message}</p>}
       </div>
