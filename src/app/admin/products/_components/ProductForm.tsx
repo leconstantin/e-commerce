@@ -33,11 +33,13 @@ export default function ProductForm() {
   const watchPriceInCents = watch("priceInCents", 0);
 
   const onSubmit = async (data: TaddSchema) => {
-    // console.log(data);
-    // await new Promise((resolve) => setTimeout(resolve, 2000));
-    addProduct(data);
-    toast("Product has been created.");
-    reset();
+    try {
+      await addProduct(data);
+      toast("Product has been created.");
+      reset();
+    } catch (error) {
+      toast.error("Failed to create product.");
+    }
   };
 
   const handleFileChange =

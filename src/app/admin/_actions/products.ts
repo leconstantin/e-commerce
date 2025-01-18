@@ -1,9 +1,8 @@
 "use server";
 import { db } from "@/db/db";
-import { z } from "zod";
 import fs from "fs/promises";
 import { redirect } from "next/navigation";
-import { addSchema, TaddSchema } from "@/lib/types";
+import { TaddSchema } from "@/lib/types";
 
 export async function addProduct(formData: TaddSchema) {
   console.log(formData);
