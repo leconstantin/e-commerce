@@ -131,13 +131,13 @@ export default function ProductForm({ product }: { product?: Product | null }) {
         {product !== null && (
           <div className="text-muted-foreground">{product?.imagePath}</div>
         )}
-        {product && (
+        {product?.imagePath && (
           <Image
-            src={product?.imagePath}
+            src={product.imagePath}
             height={400}
             width={600}
             alt="product image"
-            className="ring-1 rounded-lg"
+            className="shadow rounded-lg"
           />
         )}
         {errors.image && <p className="text-red-500">{errors.image.message}</p>}

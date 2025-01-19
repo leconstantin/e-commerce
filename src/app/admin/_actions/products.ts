@@ -74,7 +74,6 @@ export async function editProduct(id: string, formData: TeditSchema) {
         name: data.name,
         description: data.description,
         priceInCents: data.priceInCents,
-        isAvailableForPurchase: false,
         filePath,
         imagePath,
       },
@@ -87,6 +86,7 @@ export async function editProduct(id: string, formData: TeditSchema) {
   }
 }
 
+// make product available for purchase
 export async function toggleProductAvailability(
   id: string,
   isAvailableForPurchase: boolean
@@ -99,6 +99,7 @@ export async function toggleProductAvailability(
   });
 }
 
+// delete product
 export async function deleteProduct(id: string) {
   const product = await db.product.delete({
     where: { id },
