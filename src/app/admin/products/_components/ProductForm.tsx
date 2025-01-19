@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,7 @@ import { addProduct } from "../../_actions/products";
 import { toast } from "sonner";
 
 export default function ProductForm() {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -34,10 +36,14 @@ export default function ProductForm() {
 
   const onSubmit = async (data: TaddSchema) => {
     try {
-      await addProduct(data);
-      toast("Product has been created.");
-      reset();
+      const result = await addProduct(data);
+      if (result.success) {
+        toast("Product has been created.");
+        reset();
+        router.push("/admin/products");
+      }
     } catch (error) {
+      console.error("Error creating product:", error);
       toast.error("Failed to create product.");
     }
   };
@@ -115,4 +121,3 @@ export default function ProductForm() {
     </form>
   );
 }
-
