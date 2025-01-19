@@ -16,8 +16,13 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  ActiveToggleDropdownItem,
+  DeleteDropdownItem,
+} from "./_components/ProductsActions";
 
 export default function AdminProductsPage() {
   return (
@@ -68,12 +73,12 @@ async function ProductsTable() {
               {product.isAvailableForPurchase ? (
                 <>
                   <span className="sr-only">Available</span>
-                  <CheckCircle2 />
+                  <CheckCircle2 className="stroke-emerald-400" />
                 </>
               ) : (
                 <>
                   <span className="sr-only">Unavailable</span>
-                  <XCircle />
+                  <XCircle className="stroke-destructive" />
                 </>
               )}
             </TableCell>
@@ -97,6 +102,15 @@ async function ProductsTable() {
                       Edit
                     </Link>
                   </DropdownMenuItem>
+                  <ActiveToggleDropdownItem
+                    id={product.id}
+                    isAvailableForPurchase={product.isAvailableForPurchase}
+                  />
+                  <DropdownMenuSeparator />
+                  <DeleteDropdownItem
+                    id={product.id}
+                    disabled={product._count.orders > 0}
+                  />
                 </DropdownMenuContent>
               </DropdownMenu>
             </TableCell>

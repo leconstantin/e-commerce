@@ -1,7 +1,7 @@
 "use server";
 import { db } from "@/db/db";
 import fs from "fs/promises";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { TaddSchema } from "@/lib/types";
 
 export async function addProduct(formData: TaddSchema) {
@@ -32,4 +32,23 @@ export async function addProduct(formData: TaddSchema) {
     },
   });
   redirect("/admin/products");
+}
+
+export async function toggleProductAvailability(
+  id: string,
+  isAvailableForPurchase: boolean
+) {
+  await db.product.update({
+    where: {
+      id,
+    },
+    data: { isAvailableForPurchase },
+  });
+}
+
+export async function deleteProduct(id: string) {
+  const product = await db.product.delete({
+    where: { id },
+  });
+  if (product === null) return notFound();
 }
