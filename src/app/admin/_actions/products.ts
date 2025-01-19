@@ -2,8 +2,9 @@
 import { db } from "@/db/db";
 import fs from "fs/promises";
 import { notFound, redirect } from "next/navigation";
-import { TaddSchema } from "@/lib/types";
+import { TaddSchema, TeditSchema } from "@/lib/types";
 
+// add product
 export async function addProduct(formData: TaddSchema) {
   // console.log(formData);
   try {
@@ -23,6 +24,52 @@ export async function addProduct(formData: TaddSchema) {
     );
 
     await db.product.create({
+      data: {
+        name: data.name,
+        description: data.description,
+        priceInCents: data.priceInCents,
+        isAvailableForPurchase: false,
+        filePath,
+        imagePath,
+      },
+    });
+    // redirect("/admin/products");
+    return { success: true };
+  } catch (error) {
+    console.error("Error in addProduct:", error);
+    throw error;
+  }
+}
+
+// Edit product
+export async function editProduct(id: string, formData: TeditSchema) {
+  // console.log(formData);
+  try {
+    const data = formData;
+    const product = await db.product.findUnique({ where: { id } });
+    if (product === null) return notFound();
+
+    let filePath = product.filePath;
+    if (data.file != null && data.file.size > 0) {
+      //   for storing updated products
+      await fs.unlink(product.filePath);
+      filePath = `products/${crypto.randomUUID()}-${data.file.name}`;
+      await fs.writeFile(filePath, Buffer.from(await data.file.arrayBuffer()));
+    }
+
+    let imagePath = product.imagePath;
+    if (data.image != null && data.image.size > 0) {
+      //   for storing updated images
+      await fs.unlink(`public${product.imagePath}`);
+      imagePath = `/products/${crypto.randomUUID()}-${data.image.name}`;
+      await fs.writeFile(
+        `public${imagePath}`,
+        Buffer.from(await data.image.arrayBuffer())
+      );
+    }
+
+    await db.product.update({
+      where: { id },
       data: {
         name: data.name,
         description: data.description,

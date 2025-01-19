@@ -18,3 +18,10 @@ export const addSchema = z.object({
 });
 
 export type TaddSchema = z.infer<typeof addSchema>;
+
+export const editSchema = addSchema.extend({
+  file: fileSchema.optional(),
+  image: imageSchema.optional(),
+});
+
+export type TeditSchema = z.infer<typeof editSchema>;

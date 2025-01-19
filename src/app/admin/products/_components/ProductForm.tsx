@@ -11,8 +11,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { addSchema, TaddSchema } from "@/lib/types";
 import { addProduct } from "../../_actions/products";
 import { toast } from "sonner";
+import { Product } from "@prisma/client";
+import Image from "next/image";
 
-export default function ProductForm() {
+export default function ProductForm({ product }: { product?: Product | null }) {
   const router = useRouter();
   const {
     register,
@@ -24,9 +26,9 @@ export default function ProductForm() {
   } = useForm<TaddSchema>({
     resolver: zodResolver(addSchema),
     defaultValues: {
-      name: "",
-      description: "",
-      priceInCents: 0,
+      name: product?.name,
+      description: product?.description,
+      priceInCents: product?.priceInCents,
       file: undefined,
       image: undefined,
     },
@@ -101,8 +103,12 @@ export default function ProductForm() {
           type="file"
           id="file"
           aria-invalid={!!errors.file}
+          required={product == null}
           onChange={handleFileChange("file")} // Handle file input manually
         />
+        {product !== null && (
+          <div className="text-muted-foreground">{product?.filePath}</div>
+        )}
         {errors.file && <p className="text-red-500">{errors.file.message}</p>}
       </div>
       <div className="space-y-2">
@@ -111,8 +117,21 @@ export default function ProductForm() {
           type="file"
           id="image"
           aria-invalid={!!errors.image}
+          required={product == null}
           onChange={handleFileChange("image")} // Handle image input manually
         />
+        {product !== null && (
+          <div className="text-muted-foreground">{product?.imagePath}</div>
+        )}
+        {product && (
+          <Image
+            src={product?.imagePath}
+            height={400}
+            width={600}
+            alt="product image"
+            className="ring-1 rounded-lg"
+          />
+        )}
         {errors.image && <p className="text-red-500">{errors.image.message}</p>}
       </div>
       <Button type="submit" disabled={isSubmitting}>
