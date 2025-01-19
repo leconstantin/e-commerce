@@ -8,14 +8,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { formatCurrency } from "@/lib/formatters";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { addSchema, TaddSchema } from "@/lib/types";
-import { addProduct } from "../../_actions/products";
+import { addSchema, TaddSchema, editSchema, TeditSchema } from "@/lib/types";
+import { addProduct, editProduct } from "../../_actions/products";
 import { toast } from "sonner";
 import { Product } from "@prisma/client";
 import Image from "next/image";
 
 export default function ProductForm({ product }: { product?: Product | null }) {
   const router = useRouter();
+  const schema = product ? editSchema : addSchema;
   const {
     register,
     handleSubmit,
@@ -24,7 +25,7 @@ export default function ProductForm({ product }: { product?: Product | null }) {
     watch,
     setValue,
   } = useForm<TaddSchema>({
-    resolver: zodResolver(addSchema),
+    resolver: zodResolver(schema),
     defaultValues: {
       name: product?.name,
       description: product?.description,
@@ -38,15 +39,22 @@ export default function ProductForm({ product }: { product?: Product | null }) {
 
   const onSubmit = async (data: TaddSchema) => {
     try {
-      const result = await addProduct(data);
+      const result = product
+        ? await editProduct(product.id, data as TeditSchema)
+        : await addProduct(data);
+
       if (result.success) {
-        toast("Product has been created.");
+        toast(
+          product ? "Product has been updated." : "Product has been created."
+        );
         reset();
         router.push("/admin/products");
       }
     } catch (error) {
-      console.error("Error creating product:", error);
-      toast.error("Failed to create product.");
+      console.error("Error submitting product:", error);
+      toast.error(
+        product ? "Failed to update product." : "Failed to create product."
+      );
     }
   };
 
