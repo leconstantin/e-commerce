@@ -6,8 +6,7 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
-async function getMostPopularProducts() {
-  await wait(2000);
+function getMostPopularProducts() {
   return db.product.findMany({
     where: {
       isAvailableForPurchase: true,
@@ -20,8 +19,7 @@ async function getMostPopularProducts() {
     take: 6,
   });
 }
-async function getNewestProducts() {
-  await wait(3000);
+function getNewestProducts() {
   return db.product.findMany({
     where: {
       isAvailableForPurchase: true,
@@ -32,9 +30,11 @@ async function getNewestProducts() {
     take: 6,
   });
 }
-function wait(duration: number) {
-  return new Promise((resolve) => setTimeout(resolve, duration));
-}
+// function wait(duration: number) {
+//   return new Promise((resolve) => setTimeout(resolve, duration));
+// }
+// async function getMostPopularProducts() {
+//     await wait(2000);
 export default function HomePage() {
   return (
     <main className="space-y-12">
