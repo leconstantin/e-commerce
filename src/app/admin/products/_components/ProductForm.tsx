@@ -143,7 +143,7 @@ export default function ProductForm({ product }: { product?: Product | null }) {
         {errors.image && <p className="text-red-500">{errors.image.message}</p>}
       </div>
       <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Saving ..." : "Save"}
+        {isSubmitting ? "Updating ..." : "Update"}
       </Button>
     </form>
   );
