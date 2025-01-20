@@ -1,40 +1,46 @@
 import { ProductCard, ProductCardSkeleton } from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import { db } from "@/db/db";
+import { cache } from "@/lib/cache";
 import { Product } from "@prisma/client";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
-function getMostPopularProducts() {
-  return db.product.findMany({
-    where: {
-      isAvailableForPurchase: true,
-    },
-    orderBy: {
-      orders: {
-        _count: "desc",
+const getMostPopularProducts = cache(
+  () => {
+    return db.product.findMany({
+      where: {
+        isAvailableForPurchase: true,
       },
-    },
-    take: 6,
-  });
-}
-function getNewestProducts() {
-  return db.product.findMany({
-    where: {
-      isAvailableForPurchase: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    take: 6,
-  });
-}
-// function wait(duration: number) {
-//   return new Promise((resolve) => setTimeout(resolve, duration));
-// }
-// async function getMostPopularProducts() {
-//     await wait(2000);
+      orderBy: {
+        orders: {
+          _count: "desc",
+        },
+      },
+      take: 6,
+    });
+  },
+  ["/"],
+  { revalidate: 60 * 60 * 24 }
+);
+// it is revalidated every singl day
+const getNewestProducts = cache(
+  () => {
+    return db.product.findMany({
+      where: {
+        isAvailableForPurchase: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 6,
+    });
+  },
+  ["/"],
+  { revalidate: 60 * 60 * 24 }
+);
+
 export default function HomePage() {
   return (
     <main className="space-y-12">

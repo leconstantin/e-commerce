@@ -3,6 +3,7 @@ import { db } from "@/db/db";
 import fs from "fs/promises";
 import { notFound, redirect } from "next/navigation";
 import { TaddSchema, TeditSchema } from "@/lib/types";
+import { revalidatePath } from "next/cache";
 
 // add product
 export async function addProduct(formData: TaddSchema) {
@@ -34,6 +35,9 @@ export async function addProduct(formData: TaddSchema) {
       },
     });
     // redirect("/admin/products");
+    revalidatePath("/");
+    revalidatePath("/products");
+
     return { success: true };
   } catch (error) {
     console.error("Error in addProduct:", error);
@@ -79,6 +83,8 @@ export async function editProduct(id: string, formData: TeditSchema) {
       },
     });
     // redirect("/admin/products");
+    revalidatePath("/");
+    revalidatePath("/products");
     return { success: true };
   } catch (error) {
     console.error("Error in addProduct:", error);
@@ -97,6 +103,8 @@ export async function toggleProductAvailability(
     },
     data: { isAvailableForPurchase },
   });
+  revalidatePath("/");
+  revalidatePath("/products");
 }
 
 // delete product
@@ -108,4 +116,6 @@ export async function deleteProduct(id: string) {
 
   await fs.unlink(product.filePath);
   await fs.unlink(`public${product.imagePath}`);
+  revalidatePath("/");
+  revalidatePath("/products");
 }
