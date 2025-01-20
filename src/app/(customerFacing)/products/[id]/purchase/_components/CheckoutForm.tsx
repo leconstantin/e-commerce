@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import {
   Elements,
+  LinkAuthenticationElement,
   PaymentElement,
   useElements,
   useStripe,
@@ -18,6 +19,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { userOrderExist } from "@/app/actions/order";
 type TcheckoutFormProps = {
   product: {
     name: string;
@@ -61,41 +63,77 @@ export default function CheckoutForm({
         </div>
       </div>
       <Elements options={{ clientSecret }} stripe={stripePromise}>
-        <Form priceInCents={product.priceInCents} />
+        <Form priceInCents={product.priceInCents} productId={product.id} />
       </Elements>
     </div>
   );
 }
-function Form({ priceInCents }: { priceInCents: number }) {
+function Form({
+  priceInCents,
+  productId,
+}: {
+  priceInCents: number;
+  productId: string;
+}) {
   const stripe = useStripe();
   const elements = useElements();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>();
+  const [email, setEmail] = useState<string>();
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    if (stripe == null || elements == null) return;
+    if (stripe == null || elements == null || email == null) return;
 
     setIsLoading(true);
     // check for existing order to prevent user for purchasing product twice
 
-    stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: `${process.env.NEXT_PUBLIC_SERVER_URL}`,
-      },
-    });
+    const orderExist = await userOrderExist(email, productId);
+
+    if (orderExist) {
+      setErrorMessage(
+        "You have already purchsed this product. Try downloading it from My orders page"
+      );
+      setIsLoading(false);
+      return;
+    }
+
+    stripe
+      .confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/stripe/purchase-success`,
+        },
+      })
+      .then(({ error }) => {
+        if (error.type === "card_error" || error.type === "validation_error") {
+          setErrorMessage(error.message);
+        } else {
+          setErrorMessage("An unknown error occured");
+        }
+      })
+      .finally(() => setIsLoading(false));
   }
   return (
     <form onSubmit={handleSubmit}>
       <Card>
         <CardHeader>
           <CardTitle>Checkout</CardTitle>
-          <CardDescription className="text-destructive">Error</CardDescription>
+          {errorMessage && (
+            <CardDescription className="text-destructive">
+              {errorMessage}
+            </CardDescription>
+          )}
         </CardHeader>
         <CardContent>
           <PaymentElement />
+          <div className="mt-4">
+            <LinkAuthenticationElement
+              onChange={(e) => setEmail(e.value.email)}
+            />
+          </div>
         </CardContent>
         <CardFooter>
           <Button
