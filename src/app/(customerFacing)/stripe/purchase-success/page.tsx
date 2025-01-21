@@ -1,6 +1,8 @@
+import { Button } from "@/components/ui/button";
 import { db } from "@/db/db";
 import { formatCurrency } from "@/lib/formatters";
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import Stripe from "stripe";
 
@@ -19,8 +21,14 @@ export default async function SuccessPage({
     where: { id: paymentIntent.metadata.productId },
   });
   if (product === null) return notFound();
+
+  const isSuccess = paymentIntent.status === "succeeded";
+
   return (
     <div className="max-w-5xl w-full mx-auto space-y-8">
+      <h1 className="text-4xl font-bold">
+        {isSuccess ? "Success!" : "Error!"}
+      </h1>
       <div
         className="
     flex gap-4 items-center"
@@ -41,8 +49,32 @@ export default async function SuccessPage({
           <div className="line-clamp-3 text-muted-foreground">
             {product.description}
           </div>
+          <Button className="mt-4 " size="lg" asChild>
+            {isSuccess ? (
+              <a
+                href={`/products/download/${await createDownloadVerification(
+                  product.id
+                )}`}
+              >
+                Download
+              </a>
+            ) : (
+              <Link href={`/product/${product.id}/purchse`}>Try Again</Link>
+            )}
+          </Button>
         </div>
       </div>
     </div>
   );
+}
+
+async function createDownloadVerification(ProductId: string) {
+  return (
+    await db.downloadVerification.create({
+      data: {
+        ProductId,
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+      },
+    })
+  ).id;
 }
